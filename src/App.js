@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import './App.css';
 
@@ -6,6 +6,7 @@ function App() {
   const [secretNumber, setSecretNumber] = useState(Math.floor(Math.random() * 99) + 1);
   const [guess, setGuess] = useState('');
   const [message, setMessage] = useState("Qual número estou pensando?");
+  const guessInputRef = useRef(null); // Ref para o input
 
   const handleGuessChange = (event) => {
     setGuess(event.target.value);
@@ -15,12 +16,19 @@ function App() {
     event.preventDefault();
     if (guess < secretNumber) {
       setMessage(`Tente um número maior que ${guess}.`);
+      setGuess('')
+      guessInputRef.current.focus();
     } else if (guess > secretNumber) {
       setMessage(`Tente um número menor que ${guess}.`);
+      setGuess('')
+      guessInputRef.current.focus();
     } else {
       setMessage('Parabéns, você acertou!');
       setSecretNumber(Math.floor(Math.random() * 99) + 1);
       setGuess('');
+
+      // Definir foco no input
+      guessInputRef.current.focus();
     }
   };
 
@@ -40,6 +48,7 @@ function App() {
                   placeholder='Digite um número de 1 a 99'
                   min="1"
                   max="99"
+                  ref={guessInputRef}
                 />
               </Col>
             </Form.Group>
