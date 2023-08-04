@@ -106,24 +106,23 @@ function App() {
 
   const updateRanking = async () => {
     setMessage("Qual número estou pensando?");
-    let playerName = '';
-    while(!playerName) {
-      playerName = prompt('Digite seu nome:');
-      
-      if (playerName) {
-        const playerRef = query(collection(db, 'users'), where('nome', '==', playerName));
-        const playerSnapshot = await getDocs(playerRef);
-        if (!playerSnapshot.empty) {
-          alert('Esse nome já existe no ranking. Por favor, escolha outro nome.');
-          playerName = '';
-        } else {
-          const pontos = calculateScore(attempts)
-          const newScore = { nome: playerName, score: Math.round(pontos), tentativas: attempts };
-          await addDoc(collection(db, "users"), newScore);
-        }}
-      //setRanking([...ranking, newScore]);
-      //await firestore.collection('ranking').add(newScore);
-    }
+    
+    const playerName = prompt('Digite seu nome:');
+    
+    if (playerName) {
+      //const playerRef = query(collection(db, 'users'), where('nome', '==', playerName));
+      //const playerSnapshot = await getDocs(playerRef);
+      //if (!playerSnapshot.empty) {
+      //  alert('Esse nome já existe no ranking. Por favor, escolha outro nome.');
+      //  playerName = '';
+      //} else {
+        const pontos = calculateScore(attempts)
+        const newScore = { nome: playerName, score: Math.round(pontos), tentativas: attempts };
+        await addDoc(collection(db, "users"), newScore);
+      }//}
+    //setRanking([...ranking, newScore]);
+    //await firestore.collection('ranking').add(newScore);
+    
   };
 
   const calculateScore = (num) => {
