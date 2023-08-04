@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table  } from 'react-bootstrap';
 import './App.css';
-import { getFirestore, collection, getDocs, addDoc, query, orderBy, limit } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -32,7 +32,31 @@ function App() {
 
   useEffect(() => {
     guessInputRef.current.focus();
-    loadRanking(); // Carrega o ranking ao iniciar a aplicação
+    const obterDados = () => {
+          const rankingRef = query(collection(db, 'users'), orderBy('score', 'desc'), limit(10))
+          const unsubscribe = onSnapshot(rankingRef, async (snapshot) => {
+            const novos_dados = await Promise.all(
+              snapshot.docs.map( (user) => {
+                const user_data = user.data()
+                console.log(user_data)
+                return {...user_data}
+              })
+            )
+            setRanking(novos_dados)
+            console.log(novos_dados)
+          })
+          return () => {
+            unsubscribe()
+          }
+          
+          //const rankingCollection = await getDocs(query(collection(db, 'users'), orderBy('score', 'desc'), limit(10)))
+          //const rankingData = rankingCollection.docs.map((doc) => doc.data());
+          //setRanking(rankingData);
+        } 
+        obterDados()
+    
+    //console.log(ranking)
+    //loadRanking(); // Carrega o ranking ao iniciar a aplicação
   }, []);
 
   useEffect(() => {
@@ -62,21 +86,14 @@ function App() {
       setGuess('');
       
       updateRanking(); // Atualiza o ranking com a nova pontuação
+      setAttempts(0)
 
       // Definir foco no input
       guessInputRef.current.focus();
     }
   };
 
-  const loadRanking = async () => {
-    try {
-      const rankingCollection = await getDocs(query(collection(db, 'users'), orderBy('score', 'desc'), limit(10)))
-      const rankingData = rankingCollection.docs.map((doc) => doc.data());
-      setRanking(rankingData);
-    } catch (error) {
-      console.error('Erro ao carregar o ranking:', error);
-    }
-  };
+
 
   const saveRanking = () => {
     // Salvar no Firestore não é necessário aqui, pois estamos lendo diretamente do Firestore
@@ -87,9 +104,9 @@ function App() {
     setMessage("Qual número estou pensando?");
     if (playerName) {
       const pontos = calculateScore(attempts)
-      const newScore = { nome: playerName, score: Math.round(pontos) };
+      const newScore = { nome: playerName, score: Math.round(pontos), tentativas: attempts };
       await addDoc(collection(db, "users"), newScore);
-      setRanking([...ranking, newScore]);
+      //setRanking([...ranking, newScore]);
       //await firestore.collection('ranking').add(newScore);
     }
   };
@@ -106,7 +123,7 @@ function App() {
       <Row>
         <Col>
           <h1 className="text-center">Jogo de Adivinhação</h1>
-          <p className="text-center">{message}</p>
+          <p className="text-center text-danger fw-bold">{message}</p>
           <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="formGuess">
               <Col sm="3" className="mx-auto">
@@ -132,6 +149,7 @@ function App() {
                 <tr>
                   <th>Posição</th>
                   <th>Nome</th>
+                  <th>Tentativas</th>
                   <th>Pontuação</th>
                 </tr>
               </thead>
@@ -140,6 +158,7 @@ function App() {
                   <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{score.nome}</td>
+                    <td>{score.tentativas}</td>
                     <td>{score.score}</td>
                   </tr>
                 ))}
