@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table  } from 'react-bootstrap';
 import './App.css';
-import { getFirestore, collection, getDocs, addDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -123,7 +123,7 @@ function App() {
       <Row>
         <Col>
           <h1 className="text-center">Jogo de Adivinhação</h1>
-          <p className="text-center text-danger fw-bold">{message}</p>
+          <p className="text-center">{message}</p>
           <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="formGuess">
               <Col sm="3" className="mx-auto">
