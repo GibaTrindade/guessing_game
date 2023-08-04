@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table  } from 'react-bootstrap';
 import './App.css';
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
