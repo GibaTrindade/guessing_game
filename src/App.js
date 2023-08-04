@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table  } from 'react-bootstrap';
 import './App.css';
-import { getFirestore, collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, query, orderBy, limit } from 'firebase/firestore';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -23,7 +23,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app)
 
 function App() {
-  const [secretNumber, setSecretNumber] = useState(Math.floor(Math.random() * 99) + 1);
+  const [secretNumber, setSecretNumber] = useState(Math.floor(Math.random() * 1000) + 1);
   const [guess, setGuess] = useState('');
   const [message, setMessage] = useState("Qual número estou pensando?");
   const [ranking, setRanking] = useState([]);
@@ -58,7 +58,7 @@ function App() {
       guessInputRef.current.focus();
     } else {
       setMessage(`Parabéns, você acertou em ${attempts} tentativas !`);
-      setSecretNumber(Math.floor(Math.random() * 99) + 1);
+      setSecretNumber(Math.floor(Math.random() * 1000) + 1);
       setGuess('');
       
       updateRanking(); // Atualiza o ranking com a nova pontuação
@@ -70,7 +70,7 @@ function App() {
 
   const loadRanking = async () => {
     try {
-      const rankingCollection = await getDocs(query(collection(db, 'users'), orderBy('score', 'desc')))
+      const rankingCollection = await getDocs(query(collection(db, 'users'), orderBy('score', 'desc'), limit(10)))
       const rankingData = rankingCollection.docs.map((doc) => doc.data());
       setRanking(rankingData);
     } catch (error) {
@@ -114,9 +114,9 @@ function App() {
                   type="number"
                   value={guess}
                   onChange={handleGuessChange}
-                  placeholder='Digite um número de 1 a 99'
+                  placeholder='Digite um número de 1 a 1000'
                   min="1"
-                  max="99"
+                  max="1000"
                   ref={guessInputRef}
                 />
               </Col>
