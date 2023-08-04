@@ -123,7 +123,7 @@ function App() {
       <Row>
         <Col>
           <h1 className="text-center">Jogo de Adivinhação</h1>
-          <p className="text-center text-danger">{message}</p>
+          <p className="text-center text-danger fw-bold">{message}</p>
           <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="formGuess">
               <Col sm="3" className="mx-auto">
