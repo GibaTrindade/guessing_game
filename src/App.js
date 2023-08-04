@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table  } from 'react-bootstrap';
 import './App.css';
-import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -27,12 +27,16 @@ function App() {
   const [guess, setGuess] = useState('');
   const [message, setMessage] = useState("Qual número estou pensando?");
   const [ranking, setRanking] = useState([]);
-  const [attempts, setAttempts] = useState(0);
+  const [attempts, setAttempts] = useState(1);
+  const [loading, setLoading] = useState(false)
   const guessInputRef = useRef(null); // Ref para o input
+  
 
   useEffect(() => {
     guessInputRef.current.focus();
+    
     const obterDados = () => {
+          setLoading(true)
           const rankingRef = query(collection(db, 'users'), orderBy('score', 'desc'), limit(10))
           const unsubscribe = onSnapshot(rankingRef, async (snapshot) => {
             const novos_dados = await Promise.all(
@@ -42,6 +46,7 @@ function App() {
                 return {...user_data}
               })
             )
+            setLoading(false)
             setRanking(novos_dados)
             console.log(novos_dados)
           })
@@ -70,14 +75,14 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setAttempts((a) => a + 1)
+    console.log(attempts)
     if (guess < secretNumber) {
       setMessage(`Tente um número maior que ${guess}.`);
-      setAttempts(attempts + 1);
       setGuess('')
       guessInputRef.current.focus();
     } else if (guess > secretNumber) {
       setMessage(`Tente um número menor que ${guess}.`);
-      setAttempts(attempts + 1);
       setGuess('')
       guessInputRef.current.focus();
     } else {
@@ -86,7 +91,7 @@ function App() {
       setGuess('');
       
       updateRanking(); // Atualiza o ranking com a nova pontuação
-      setAttempts(0)
+      setAttempts(1)
 
       // Definir foco no input
       guessInputRef.current.focus();
@@ -100,12 +105,22 @@ function App() {
   };
 
   const updateRanking = async () => {
-    const playerName = prompt('Digite seu nome:');
     setMessage("Qual número estou pensando?");
-    if (playerName) {
-      const pontos = calculateScore(attempts)
-      const newScore = { nome: playerName, score: Math.round(pontos), tentativas: attempts };
-      await addDoc(collection(db, "users"), newScore);
+    let playerName = '';
+    while(!playerName) {
+      playerName = prompt('Digite seu nome:');
+      
+      if (playerName) {
+        const playerRef = query(collection(db, 'users'), where('nome', '==', playerName));
+        const playerSnapshot = await getDocs(playerRef);
+        if (!playerSnapshot.empty) {
+          alert('Esse nome já existe no ranking. Por favor, escolha outro nome.');
+          playerName = '';
+        } else {
+          const pontos = calculateScore(attempts)
+          const newScore = { nome: playerName, score: Math.round(pontos), tentativas: attempts };
+          await addDoc(collection(db, "users"), newScore);
+        }}
       //setRanking([...ranking, newScore]);
       //await firestore.collection('ranking').add(newScore);
     }
@@ -122,7 +137,7 @@ function App() {
     <Container className="App">
       <Row>
         <Col>
-          <h1 className="text-center">Jogo de Adivinhação</h1>
+          <h1 className="text-center">Jogo da Adivinhação</h1>
           <p className="text-center text-danger fw-bold">{message}</p>
           <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="formGuess">
@@ -143,6 +158,9 @@ function App() {
             </div>
           </Form>
           <div className="mt-3">
+            {loading ? <h2>Trazendo Ranking...</h2> 
+            :
+            <>
             <h2>Ranking</h2>
             <Table striped bordered hover responsive>
               <thead>
@@ -164,6 +182,9 @@ function App() {
                 ))}
               </tbody>
             </Table>
+            </>
+          }
+            
           </div>
         </Col>
       </Row>
