@@ -27,7 +27,8 @@ function App() {
   const [guess, setGuess] = useState('');
   const [message, setMessage] = useState("Qual número estou pensando?");
   const [ranking, setRanking] = useState([]);
-  const [attempts, setAttempts] = useState(1);
+  const [attempts, setAttempts] = useState(0);
+  //const [pontos, setPontos] = useState(0);
   const [loading, setLoading] = useState(false)
   const guessInputRef = useRef(null); // Ref para o input
   
@@ -68,15 +69,15 @@ function App() {
     saveRanking(); // Salva o ranking sempre que ele for atualizado
   }, [ranking]);
 
-
   const handleGuessChange = (event) => {
     setGuess(event.target.value);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setAttempts((a) => a + 1)
-    console.log(attempts)
+    //setAttempts((a) => a + 1)
+    let newAttempts = attempts + 1;
+    console.log(newAttempts)
     if (guess < secretNumber) {
       setMessage(`Tente um número maior que ${guess}.`);
       setGuess('')
@@ -90,12 +91,14 @@ function App() {
       setSecretNumber(Math.floor(Math.random() * 1000) + 1);
       setGuess('');
       
-      updateRanking(); // Atualiza o ranking com a nova pontuação
-      setAttempts(1)
-
+      //updateRanking(); // Atualiza o ranking com a nova pontuação
+      updateRanking(newAttempts);
+      //setAttempts(0)
+      newAttempts = 0
       // Definir foco no input
       guessInputRef.current.focus();
     }
+    setAttempts(newAttempts);
   };
 
 
@@ -104,10 +107,10 @@ function App() {
     // Salvar no Firestore não é necessário aqui, pois estamos lendo diretamente do Firestore
   };
 
-  const updateRanking = async () => {
+  const updateRanking = async (tent) => {
     setMessage("Qual número estou pensando?");
     
-    const playerName = prompt('Digite seu nome:');
+    const playerName = prompt(`Digite seu nome, você acertou em ${tent} tentativas:`);
     
     if (playerName) {
       //const playerRef = query(collection(db, 'users'), where('nome', '==', playerName));
@@ -116,8 +119,8 @@ function App() {
       //  alert('Esse nome já existe no ranking. Por favor, escolha outro nome.');
       //  playerName = '';
       //} else {
-        const pontos = calculateScore(attempts)
-        const newScore = { nome: playerName, score: Math.round(pontos), tentativas: attempts };
+        const pontos = calculateScore(tent)
+        const newScore = { nome: playerName, score: Math.round(pontos), tentativas: tent };
         await addDoc(collection(db, "users"), newScore);
       }//}
     //setRanking([...ranking, newScore]);
