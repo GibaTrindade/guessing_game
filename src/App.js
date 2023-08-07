@@ -189,7 +189,8 @@ function App() {
             
           </div>
         </Col>
-        
+        </Row>
+        <Row>
         <Col>
         <br/>
         Recordes:
