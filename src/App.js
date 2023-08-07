@@ -189,6 +189,27 @@ function App() {
             
           </div>
         </Col>
+        
+        <Col>
+        <br/>
+        Recordes:
+        <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Tentativas</th>
+                  <th>Pontuação</th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr key={Math.floor(Math.random() * 1000)}>
+                    <td>Bela</td>
+                    <td>1</td>
+                    <td>1000</td>
+                  </tr>
+              </tbody>
+              </Table>
+        </Col>
       </Row>
     </Container>
   );
